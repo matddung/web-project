@@ -3,15 +3,18 @@ package com.example.demo.jwt;
 import com.example.demo.config.OAuth2Config;
 import com.example.demo.dto.TokenDto;
 import com.example.demo.util.UserPrincipal;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
@@ -53,5 +56,29 @@ public class JwtService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public UsernamePasswordAuthenticationToken getAuthenticationByEmail(String email){
+        UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        return authentication;
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            byte[] keyBytes = oAuth2ConfigHolder.getAuth().getTokenSecret().getBytes(StandardCharsets.UTF_8);
+            Key key = Keys.hmacShaKeyFor(keyBytes);
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            return true;
+        } catch (SecurityException | MalformedJwtException ex) {
+            log.error("잘못된 JWT 서명입니다.");
+        } catch (ExpiredJwtException ex) {
+            log.error("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException ex) {
+            log.error("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalArgumentException ex) {
+            log.error("JWT 토큰이 잘못되었습니다.");
+        }
+        return false;
     }
 }

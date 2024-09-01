@@ -1,5 +1,7 @@
 package com.example.demo.util;
 
+import com.example.demo.jwt.DefaultAuthenticationException;
+
 import java.util.Optional;
 
 public class DefaultAssert {
@@ -12,6 +14,12 @@ public class DefaultAssert {
     public static void isOptionalPresent(Optional<?> value){
         if(!value.isPresent()){
             throw new DefaultException(ErrorCode.INVALID_PARAMETER);
+        }
+    }
+
+    public static void isAuthentication(boolean value){
+        if(!value){
+            throw new DefaultAuthenticationException(ErrorCode.INVALID_AUTHENTICATION);
         }
     }
 }

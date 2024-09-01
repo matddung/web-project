@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -76,5 +77,28 @@ public class UserService {
         AuthResponse authResponse = AuthResponse.builder().accessToken(tokenDto.getAccessToken()).refreshToken(token.getRefreshToken()).build();
 
         return ResponseEntity.ok(authResponse);
+    }
+
+    public ResponseEntity<?> logout(String refreshToken) {
+        boolean checkValid = valid(refreshToken);
+        DefaultAssert.isAuthentication(checkValid);
+        
+        Optional<Token> token = tokenRepository.findByRefreshToken(refreshToken);
+        tokenRepository.delete(token.get());
+        
+        return ResponseEntity.ok("로그아웃 성공");
+    }
+
+    private boolean valid(String refreshToken) {
+        boolean validateCheck = jwtService.validateToken(refreshToken);
+        DefaultAssert.isTrue(validateCheck, "Token 검증에 실패하였습니다.");
+
+        Optional<Token> token = tokenRepository.findByRefreshToken(refreshToken);
+        DefaultAssert.isTrue(token.isPresent(), "탈퇴 처리된 회원입니다.");
+
+        Authentication authentication = jwtService.getAuthenticationByEmail(token.get().getUserEmail());
+        DefaultAssert.isTrue(token.get().getUserEmail().equals(authentication.getName()), "사용자 인증에 실패하였습니다.");
+
+        return true;
     }
 }

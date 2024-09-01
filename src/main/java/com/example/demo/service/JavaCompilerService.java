@@ -34,7 +34,6 @@ public class JavaCompilerService {
 
         if (result == 0) {
             try {
-                // 컴파일된 Main 클래스를 실행
                 ProcessBuilder processBuilder = new ProcessBuilder("java", "-Dfile.encoding=UTF-8", "-cp", ".", "Main");
                 processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
