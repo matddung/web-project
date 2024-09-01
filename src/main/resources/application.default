@@ -15,7 +15,7 @@ spring:
         show_sql: true
 
 jwt:
-  secret-key: UMXp/tJ2W7WLAWjPopeBYHVwdDyW5yIFYmIZSbm+jvPH1ZD7TGhsAR34VuBxX7w7katpMN5q3D7rddAtwSLqmg==
+  secret-key: ${JWT_SECRET_KEY}
   access:
     expiration: 3600000 # hours in milliseconds
   refresh:
