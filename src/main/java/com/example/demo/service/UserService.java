@@ -37,6 +37,7 @@ public class UserService {
     public ResponseEntity<?> signUp(SignUpRequest signUpRequest) {
         DefaultAssert.isTrue(!userRepository.existsByEmail(signUpRequest.getEmail()), "중복 이메일");
         DefaultAssert.isTrue(!userRepository.existsByNickname(signUpRequest.getNickname()), "중복 닉네임");
+        DefaultAssert.isTrue(!userRepository.existsByPhoneNumber(signUpRequest.getPhoneNumber()), "중복 전화번호");
 
         User user = User.builder()
                 .email(signUpRequest.getEmail())

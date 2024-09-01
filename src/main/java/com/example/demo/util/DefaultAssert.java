@@ -22,4 +22,8 @@ public class DefaultAssert {
             throw new DefaultAuthenticationException(ErrorCode.INVALID_AUTHENTICATION);
         }
     }
+
+    public static void isAuthentication(String message){
+        throw new DefaultAuthenticationException(message);
+    }
 }
