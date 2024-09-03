@@ -46,7 +46,6 @@ public class CustomCookie {
             }
         }
     }
-
     
     public static String serialize(Object object) {
         return Base64.getUrlEncoder().encodeToString(SerializationUtils.serialize(object));

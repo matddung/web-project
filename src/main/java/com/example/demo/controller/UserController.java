@@ -21,8 +21,13 @@ public class UserController {
         return userService.signUp(signUpRequest);
     }
 
-    @PostMapping(value = "/signIn")
+    @PostMapping("/signIn")
     public ResponseEntity<?> signIn(@RequestBody SignInRequest signInRequest) {
         return userService.signIn(signInRequest);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(String refreshToken) {
+        return userService.logout(refreshToken);
     }
 }
