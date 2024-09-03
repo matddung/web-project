@@ -80,13 +80,37 @@ public class UserService {
         return ResponseEntity.ok(authResponse);
     }
 
+    public ResponseEntity<?> refresh(String refreshToken) {
+        boolean checkValid = valid(refreshToken);
+        DefaultAssert.isAuthentication(checkValid);
+
+        Optional<Token> token = tokenRepository.findByRefreshToken(refreshToken);
+        Authentication authentication = jwtService.getAuthenticationByEmail(token.get().getUserEmail());
+
+        TokenDto tokenDto;
+
+        Long expirationTime = jwtService.getExpiration(refreshToken);
+        if (expirationTime > 0) {
+            tokenDto = jwtService.refreshToken(authentication, refreshToken);
+        } else {
+            tokenDto = jwtService.createToken(authentication);
+        }
+
+        Token updateToken = token.get().updateRefreshToken(tokenDto.getRefreshToken());
+        tokenRepository.save(updateToken);
+
+        AuthResponse authResponse = AuthResponse.builder().accessToken(tokenDto.getAccessToken()).refreshToken(updateToken.getRefreshToken()).build();
+
+        return ResponseEntity.ok(authResponse);
+    }
+
     public ResponseEntity<?> logout(String refreshToken) {
         boolean checkValid = valid(refreshToken);
         DefaultAssert.isAuthentication(checkValid);
         
         Optional<Token> token = tokenRepository.findByRefreshToken(refreshToken);
         tokenRepository.delete(token.get());
-        
+
         return ResponseEntity.ok("로그아웃 성공");
     }
 

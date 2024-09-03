@@ -15,8 +15,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
 
 @Slf4j
@@ -59,6 +61,30 @@ public class JwtService {
                 .build();
     }
 
+    public TokenDto refreshToken(Authentication authentication, String refreshToken) {
+        UserPrincipal userPrincipal = (UserPrincipal) authentication.getPrincipal();
+        Date nowDate = new Date();
+
+        Date accessTokenExpiresIn = new Date(nowDate.getTime() + oAuth2ConfigHolder.getAuth().getAccessTokenExpirationMsec());
+
+        String secretKey = oAuth2ConfigHolder.getAuth().getTokenSecret();
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        Key key = Keys.hmacShaKeyFor(keyBytes);
+
+        String accessToken = Jwts.builder()
+                .setSubject(Long.toString(userPrincipal.getId()))
+                .setIssuedAt(new Date())
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+
+        return TokenDto.builder()
+                .userEmail(userPrincipal.getEmail())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
     public UsernamePasswordAuthenticationToken getAuthenticationByEmail(String email){
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(email);
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -81,6 +107,21 @@ public class JwtService {
                 .getBody();
 
         return Long.parseLong(claims.getSubject());
+    }
+
+    public Long getExpiration(String token) {
+        byte[] keyBytes = Base64.getDecoder().decode(oAuth2ConfigHolder.getAuth().getTokenSecret());
+        Key key = new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
+
+        Date expiration = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
+
+        long now = new Date().getTime();
+        return (expiration.getTime() - now);
     }
 
     public boolean validateToken(String token) {

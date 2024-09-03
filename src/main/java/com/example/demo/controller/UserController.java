@@ -30,4 +30,9 @@ public class UserController {
     public ResponseEntity<?> logout(String refreshToken) {
         return userService.logout(refreshToken);
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<?> refresh(@RequestBody String refreshToken) {
+        return userService.refresh(refreshToken);
+    }
 }
