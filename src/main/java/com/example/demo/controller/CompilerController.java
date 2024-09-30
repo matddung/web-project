@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/java/api")
+@RequestMapping("/api/compiler")
 @RequiredArgsConstructor
 public class CompilerController {
     private final JavaCompilerService javaCompilerService;
 
-    @PostMapping("/compiler")
+    @PostMapping
     public ResponseEntity<?> compiler(@RequestBody String code) {
         return javaCompilerService.compile(code);
     }

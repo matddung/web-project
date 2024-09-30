@@ -1,8 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.AuthResponse;
-import com.example.demo.dto.SignInRequest;
-import com.example.demo.dto.SignUpRequest;
+import com.example.demo.dto.response.AuthResponse;
+import com.example.demo.dto.request.SignInRequest;
+import com.example.demo.dto.request.SignUpRequest;
 import com.example.demo.dto.TokenDto;
 import com.example.demo.entity.Token;
 import com.example.demo.entity.User;
@@ -19,6 +19,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -26,6 +27,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;

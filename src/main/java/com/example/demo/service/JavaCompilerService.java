@@ -7,10 +7,18 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class JavaCompilerService {
     public ResponseEntity<?> compile(String code) {
+        String className = extractClassName(code);
+
+        if (className == null) {
+            return ResponseEntity.status(400).body("클래스 명 오류");
+        }
+
         if (code.startsWith("\"") && code.endsWith("\"")) {
             code = code.substring(1, code.length() - 1);
         }
@@ -19,7 +27,7 @@ public class JavaCompilerService {
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-        File file = new File("Main.java");
+        File file = new File(className + ".java");
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(code);
@@ -34,7 +42,7 @@ public class JavaCompilerService {
 
         if (result == 0) {
             try {
-                ProcessBuilder processBuilder = new ProcessBuilder("java", "-Dfile.encoding=UTF-8", "-cp", ".", "Main");
+                ProcessBuilder processBuilder = new ProcessBuilder("java", "-Dfile.encoding=UTF-8", "-cp", ".", className);
                 processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
 
@@ -49,6 +57,7 @@ public class JavaCompilerService {
                 process.waitFor();
 
                 Files.deleteIfExists(file.toPath());
+                Files.deleteIfExists(new File(className + ".class").toPath());
 
                 return ResponseEntity.ok(executionResult.toString());
             } catch (Exception e) {
@@ -62,5 +71,16 @@ public class JavaCompilerService {
             }
             return ResponseEntity.status(500).body("Compilation failed:\n" + outputStream.toString());
         }
+    }
+
+    private String extractClassName(String code) {
+        Pattern pattern = Pattern.compile("public\\s+class\\s+(\\w+)");
+        Matcher matcher = pattern.matcher(code);
+
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+
+        return null;
     }
 }
