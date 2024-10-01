@@ -7,22 +7,20 @@ import com.example.demo.util.DefaultAssert;
 import com.example.demo.util.OAuth2UserInfoFactory;
 import com.example.demo.util.UserPrincipal;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.security.SecureRandom;
 import java.util.Optional;
 
-@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class CustomOAuth2Service extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -52,24 +50,10 @@ public class CustomOAuth2Service extends DefaultOAuth2UserService {
     }
 
     private User registerNewUser(OAuth2UserRequest oAuth2UserRequest, OAuth2UserInfo oAuth2UserInfo) {
-        SecureRandom random = new SecureRandom();
-        StringBuilder sb = new StringBuilder(8);
-
-        String nickname;
-
-        do {
-            sb.setLength(0);
-            for (int i = 0; i < 8; i++) {
-                int index = random.nextInt(CHARACTERS.length());
-                sb.append(CHARACTERS.charAt(index));
-            }
-            nickname = sb.toString();
-        } while (userRepository.existsByNickname(nickname));
-
         User user = User.builder()
                 .provider(oAuth2UserRequest.getClientRegistration().getRegistrationId())
                 .providerId(oAuth2UserInfo.getId())
-                .nickname(nickname)
+                .name(oAuth2UserInfo.getName())
                 .email(oAuth2UserInfo.getEmail())
                 .role("USER")
                 .build();

@@ -11,7 +11,7 @@ public class SwaggerConfig {
     public OpenAPI swaggerApi() {
         return new OpenAPI()
                 .info(new Info()
-                        .title("demo")
+                        .title("coding test site clone coding")
                         .version("1.0.0"));
     }
 }

@@ -32,7 +32,7 @@ public class ProblemService {
 
         problemRepository.save(problem);
 
-        return ResponseEntity.ok(problem);
+        return ResponseEntity.ok("Problem create success\n" + problem);
     }
 
     public ResponseEntity<?> modifyProblem(Long problemId, UserPrincipal userPrincipal, ProblemRequest problemRequest) {
@@ -64,7 +64,7 @@ public class ProblemService {
 
         problemRepository.save(problem);
 
-        return ResponseEntity.ok("문제 수정에 성공하였습니다.");
+        return ResponseEntity.ok(problem);
     }
 
     public ResponseEntity<?> deleteProblem(Long problemId, UserPrincipal userPrincipal) {
