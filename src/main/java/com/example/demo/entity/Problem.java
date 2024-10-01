@@ -26,9 +26,6 @@ public class Problem {
     private String difficulty;
     @CreatedDate
     private LocalDateTime createdAt;
-
-    @ManyToOne
-    @JoinColumn(name = "user_name")
     private String createBy;
 
     @Builder

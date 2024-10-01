@@ -16,9 +16,6 @@ public class TestCase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @ManyToOne
-    @JoinColumn(name = "problem_id")
     private Long problemId;
 
     @Lob
