@@ -1,10 +1,7 @@
 package com.example.demo.controller;
 
-import com.example.demo.service.JavaCompilerService;
+import com.example.demo.service.CompilerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -12,10 +9,10 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/compiler")
 @RequiredArgsConstructor
 public class CompilerController {
-    private final JavaCompilerService javaCompilerService;
+    private final CompilerService compilerService;
 
-    @PostMapping
-    public ResponseEntity<?> compiler(@RequestBody String code) {
-        return javaCompilerService.compile(code);
-    }
+//    @PostMapping
+//    public ResponseEntity<?> compiler(@RequestBody String code) {
+//        return compilerService.compile(code);
+//    }
 }

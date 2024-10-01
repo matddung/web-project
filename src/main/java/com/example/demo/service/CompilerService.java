@@ -7,12 +7,15 @@ import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Service
-public class JavaCompilerService {
-    public ResponseEntity<?> compile(String code) {
+public class CompilerService {
+    public ResponseEntity<?> compileWithInput(String code, String inputData) {
         String className = extractClassName(code);
 
         if (className == null) {
@@ -27,7 +30,8 @@ public class JavaCompilerService {
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
 
-        File file = new File(className + ".java");
+        String uniqueFileName = className + "_" + UUID.randomUUID().toString() + ".java";
+        File file = new File(uniqueFileName);
 
         try (FileWriter fileWriter = new FileWriter(file)) {
             fileWriter.write(code);
@@ -46,20 +50,30 @@ public class JavaCompilerService {
                 processBuilder.redirectErrorStream(true);
                 Process process = processBuilder.start();
 
+                OutputStream processOutputStream = process.getOutputStream();
+                processOutputStream.write(inputData.getBytes());
+                processOutputStream.flush();
+                processOutputStream.close();
+
                 BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream(), "UTF-8"));
                 StringBuilder executionResult = new StringBuilder();
                 String line;
+
+                boolean finished = process.waitFor(5, TimeUnit.SECONDS);
+
+                if (!finished) {
+                    process.destroy();
+                    return ResponseEntity.status(500).body("Execution timed out.");
+                }
 
                 while ((line = reader.readLine()) != null) {
                     executionResult.append(line).append("\n");
                 }
 
-                process.waitFor();
-
                 Files.deleteIfExists(file.toPath());
-                Files.deleteIfExists(new File(className + ".class").toPath());
+                Files.deleteIfExists(Paths.get(className + ".class"));
 
-                return ResponseEntity.ok(executionResult.toString());
+                return ResponseEntity.ok(executionResult.toString().trim());
             } catch (Exception e) {
                 return ResponseEntity.status(500).body("Execution failed: " + e.getMessage());
             }
